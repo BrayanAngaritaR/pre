@@ -1,6 +1,6 @@
 // components/Grid.tsx
 
-import type { Perfil } from "@/data";
+import type { Perfil } from "../data";
 import Card from "./Card";
 
 export default function Grid({

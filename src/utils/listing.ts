@@ -1,5 +1,5 @@
 // utils/listing.ts
-import type { Perfil } from "@/data";
+import type { Perfil } from "../data";
 
 export function shuffle<T>(arr: T[]) {
 	const a = [...arr];

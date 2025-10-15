@@ -3,7 +3,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import CategoryMenu from "../components/CategoryMenu";
 import Filters, { type FiltersState } from "../components/Filters";
 import Grid from "../components/Grid";
-import { PERFILES, type Perfil, SITE_CONFIG } from "../data";
+import { PERFILES, SITE_CONFIG } from "../data";
 import { DEFAULT_FILTERS as DEFAULTS, matchesFilters } from "../utils/filters";
 import { splitPaidUnpaid } from "../utils/listing";
 

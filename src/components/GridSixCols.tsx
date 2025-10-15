@@ -8,7 +8,7 @@ export default function GridSixCols() {
 			<h2 className="text-lg font-semibold mb-3">Destacados</h2>
 			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
 				{PERFILES_30.map((p) => (
-					<Card key={p.id} src={p.fotos[0]} label={`${p.nombre} • ${p.edad}`} />
+					<Card key={p.id} perfil={p} />
 				))}
 			</div>
 		</section>
