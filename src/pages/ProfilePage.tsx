@@ -120,6 +120,18 @@ function StoryViewer({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [open, playing, catIdx, itemIdx, durationMs]);
 
+	// Cerrar con ESC y navegar con flechas
+	useEffect(() => {
+		if (!open) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") onClose();
+			if (e.key === "ArrowRight") nextItem();
+			if (e.key === "ArrowLeft") prevItem();
+		};
+		window.addEventListener("keydown", onKey);
+		return () => window.removeEventListener("keydown", onKey);
+	}, [open]);
+
 	function nextItem() {
 		progressRef.current = 0;
 		if (itemIdx < items.length - 1) {
@@ -181,8 +193,8 @@ function StoryViewer({
 
 	return (
 		<div className="fixed inset-0 z-[70] bg-black/95 text-white">
-			{/* Top bar: progress + close */}
-			<div className="absolute top-0 left-0 right-0 p-3 space-y-2">
+			{/* Top bar: progress + close (encima de todo) */}
+			<div className="absolute top-0 left-0 right-0 p-3 space-y-2 z-20">
 				{/* progress bars por cada item de la categoría actual */}
 				<div className="flex gap-1">
 					{items.map((_, i) => (
@@ -209,9 +221,9 @@ function StoryViewer({
 				</div>
 			</div>
 
-			{/* Media */}
+			{/* Media (debajo de la top bar) */}
 			<div
-				className="absolute inset-0 grid place-items-center select-none"
+				className="absolute inset-0 grid place-items-center select-none z-0"
 				onMouseDown={onPointerDown}
 				onMouseUp={onPointerUp}
 				onMouseLeave={() => downRef.current && onPointerUp()}
@@ -226,16 +238,16 @@ function StoryViewer({
 				/>
 			</div>
 
-			{/* Tap zones L/R */}
+			{/* Tap zones L/R (empiezan bajo la top bar y por debajo de ella en z-index) */}
 			<div
-				className="absolute inset-0"
+				className="absolute left-0 right-0 bottom-0 top-16 z-10"
 				onClick={onTapZone}
 				onTouchStart={onTouchStart}
 				onTouchEnd={onTouchEnd}
 			/>
 
-			{/* Play/Pause */}
-			<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+			{/* Play/Pause (encima para que sea clickeable) */}
+			<div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
 				<button
 					onClick={() => setPlaying((p) => !p)}
 					className="px-3 py-1.5 rounded-lg border border-white/20 text-white/80 hover:text-white"
@@ -364,8 +376,7 @@ export default function ProfileDetailPage() {
 		setShowStories(true);
 	};
 
-	// Lightbox fotos/posts (si ya lo tenías, puedes mantenerlo aparte)
-
+	// Tabs
 	const [tab, setTab] = useState<TabId>("fotos");
 
 	return (
@@ -380,7 +391,7 @@ export default function ProfileDetailPage() {
 				</div>
 			</div>
 
-			{/* Encabezado perfil (igual que tenías) */}
+			{/* Encabezado perfil */}
 			<section className="flex items-start gap-5">
 				<div className="w-28 h-28 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
 					<img
