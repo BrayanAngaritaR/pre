@@ -11,9 +11,12 @@ export default function Layout() {
 			<Outlet />
 
 			<footer className="border-t border-slate-200 dark:border-slate-800">
-				<div className="mx-auto w-full max-w-[1600px] px-6 py-6 text-xs text-slate-500 dark:text-slate-400">
-					Solo para mayores de 18 años. Respeta las leyes locales y las normas
-					de la plataforma.
+				<div className="mx-auto text-center w-full max-w-[1600px] px-6 py-6 text-xs text-slate-500 dark:text-slate-400">
+					<p>
+						Solo para mayores de 18 años. Respeta las leyes locales y las normas
+						de la plataforma.{" "}
+					</p>
+					<b>Versión 0.0.1</b>
 				</div>
 			</footer>
 		</div>

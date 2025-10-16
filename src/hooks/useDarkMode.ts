@@ -1,30 +1,78 @@
 // src/hooks/useDarkMode.ts
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function useDarkMode(defaultTheme: "light" | "dark" = "light") {
-	const [theme, setTheme] = useState<"light" | "dark">(defaultTheme);
+type ThemePref = "light" | "dark" | "system";
+type Resolved = "light" | "dark";
 
+const STORAGE_KEY = "theme";
+
+function getSystemTheme(): Resolved {
+	if (typeof window === "undefined") return "light";
+	return window.matchMedia("(prefers-color-scheme: dark)").matches
+		? "dark"
+		: "light";
+}
+
+function applyThemeToDOM(theme: Resolved) {
+	const root = document.documentElement; // <html>
+	root.classList.toggle("dark", theme === "dark");
+	// Ayuda a formularios nativos y scrollbars:
+	root.style.colorScheme = theme;
+}
+
+export function useDarkMode(defaultPref: ThemePref = "system") {
+	const [pref, setPref] = useState<ThemePref>(() => {
+		const saved =
+			typeof window !== "undefined"
+				? (localStorage.getItem(STORAGE_KEY) as ThemePref | null)
+				: null;
+		return saved ?? defaultPref;
+	});
+
+	const mqlRef = useRef<MediaQueryList | null>(null);
+	const resolved: Resolved =
+		pref === "system"
+			? typeof window !== "undefined"
+				? getSystemTheme()
+				: "light"
+			: pref;
+
+	// Aplica inmediatamente cuando cambia la preferencia/resolución:
 	useEffect(() => {
-		const saved = localStorage.getItem("theme") as "light" | "dark" | null;
-		if (saved) {
-			setTheme(saved);
-			document.documentElement.classList.toggle("dark", saved === "dark");
-		} else {
-			const prefersDark = window.matchMedia(
-				"(prefers-color-scheme: dark)",
-			).matches;
-			const system = prefersDark ? "dark" : "light";
-			setTheme(system);
-			document.documentElement.classList.toggle("dark", system === "dark");
-		}
-	}, []);
+		applyThemeToDOM(resolved);
+	}, [resolved]);
 
-	const toggle = () => {
-		const next = theme === "dark" ? "light" : "dark";
-		setTheme(next);
-		localStorage.setItem("theme", next);
-		document.documentElement.classList.toggle("dark", next === "dark");
+	// Suscríbete a cambios del sistema si la preferencia es "system"
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		mqlRef.current = window.matchMedia("(prefers-color-scheme: dark)");
+		const handler = () => {
+			if (pref === "system") applyThemeToDOM(getSystemTheme());
+		};
+		mqlRef.current.addEventListener("change", handler);
+		return () => mqlRef.current?.removeEventListener("change", handler);
+	}, [pref]);
+
+	// Guarda cambios en localStorage excepto cuando es "system"
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		if (pref === "system") localStorage.removeItem(STORAGE_KEY);
+		else localStorage.setItem(STORAGE_KEY, pref);
+	}, [pref]);
+
+	const setTheme = useCallback((next: ThemePref) => setPref(next), []);
+	const toggle = useCallback(() => {
+		// Toggle inteligente: si estas en system, usa el resolved actual para decidir
+		const base: Resolved =
+			pref === "system" ? getSystemTheme() : (pref as Resolved);
+		setPref(base === "dark" ? "light" : "dark");
+	}, [pref]);
+
+	return {
+		pref,
+		theme: resolved,
+		setTheme,
+		toggle,
+		isDark: resolved === "dark",
 	};
-
-	return { theme, toggle };
 }
